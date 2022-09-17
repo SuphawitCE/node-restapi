@@ -1,9 +1,18 @@
 const bodyParser = require('body-parser');
 const express = require('express');
+const mongoose = require('mongoose');
 
 const feedRoutes = require('./routes/feed');
 
+require('dotenv').config();
+
 const app = express();
+
+const username = process.env.MONGO_USERNAME;
+const password = process.env.MONGO_PASSWORD;
+
+const collectionName = 'messages';
+const dbURI = `mongodb+srv://${username}:${password}@cluster0.ypnh4.mongodb.net/${collectionName}`;
 
 // app.use(bodyParser.urlencoded()); //  x-www-form-urlencoded Use with form <form>
 app.use(bodyParser.json()); //  application/json
@@ -33,4 +42,13 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes);
 
-app.listen(8080);
+// Connect to mongoose
+mongoose
+  .connect(dbURI)
+  .then((result) => {
+    console.log('Server are running...');
+    app.listen(8080);
+  })
+  .catch((err) => {
+    console.log(err);
+  });

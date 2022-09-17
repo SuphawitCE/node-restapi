@@ -1,5 +1,7 @@
 const { validationResult } = require('express-validator/check');
 
+const Post = require('../models/post');
+
 exports.getPosts = (req, res, next) => {
   // req.body will works cause bodyParser.json()
   console.log('get-post-request: ', req.body);
@@ -41,19 +43,28 @@ exports.createPost = (req, res, next) => {
   const title = req.body.title;
   const content = req.body.content;
 
-  // Create post in DB
-  const responseData = {
-    message: 'Post created successfully',
-    post: {
-      _id: new Date().toISOString(),
-      title,
-      content,
-      creator: { name: 'Bank' },
-      createdAt: new Date()
-    }
-  };
+  const post = new Post({
+    title,
+    content,
+    imageUrl: 'images/fatcat1.jpeg',
+    creator: { name: 'Bank' }
+  });
 
-  console.log('create-post-response: ', responseData);
+  post
+    .save()
+    .then((result) => {
+      console.log('post-result: ', result);
+      // Create post in DB
+      const responseData = {
+        message: 'Post created successfully',
+        post: result
+      };
 
-  res.status(201).json(responseData);
+      console.log('create-post-response: ', responseData);
+
+      res.status(201).json(responseData);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 };
