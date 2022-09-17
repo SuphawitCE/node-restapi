@@ -1,3 +1,5 @@
+const path = require('path');
+
 const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -16,6 +18,9 @@ const dbURI = `mongodb+srv://${username}:${password}@cluster0.ypnh4.mongodb.net/
 
 // app.use(bodyParser.urlencoded()); //  x-www-form-urlencoded Use with form <form>
 app.use(bodyParser.json()); //  application/json
+
+// Serve static images, register middleware
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // CORS
 app.use((req, res, next) => {
@@ -38,6 +43,14 @@ app.use((req, res, next) => {
 
   // Request can now continue and can be handled by our routes
   next();
+});
+
+// Register error handling middleware
+app.use((error, req, res, next) => {
+  console.log('app.js-error: ', error);
+  const { status, message } = error;
+
+  res.status(status || 500).json({ message });
 });
 
 app.use('/feed', feedRoutes);
