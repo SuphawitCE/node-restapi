@@ -14,7 +14,15 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   //  Allow request method or can use a wildcard to allow all methods
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'OPTIONS',
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE'
+  );
 
   //  Allow authorization
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
