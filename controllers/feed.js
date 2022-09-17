@@ -1,5 +1,7 @@
 const { validationResult } = require('express-validator/check');
 
+const Post = require('../models/post');
+
 exports.getPosts = (req, res, next) => {
   // req.body will works cause bodyParser.json()
   console.log('get-post-request: ', req.body);
@@ -24,36 +26,44 @@ exports.getPosts = (req, res, next) => {
 };
 
 // POST method
-exports.createPost = (req, res, next) => {
-  // Validate request
-  const errors = validationResult(req);
+exports.createPost = async (req, res, next) => {
+  try {
+    // Validate request
+    const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(422).json({
-      message: 'Validation failed, entered data is incorrect.',
-      errors: errors.array()
-    });
-  }
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        message: 'Validation failed, entered data is incorrect.',
+        errors: errors.array()
+      });
+    }
 
-  // req.body will works cause bodyParser.json()
-  console.log('create-post-request: ', req.body);
+    // req.body will works cause bodyParser.json()
+    console.log('create-post-request: ', req.body);
 
-  const title = req.body.title;
-  const content = req.body.content;
+    const title = req.body.title;
+    const content = req.body.content;
 
-  // Create post in DB
-  const responseData = {
-    message: 'Post created successfully',
-    post: {
-      _id: new Date().toISOString(),
+    const post = new Post({
       title,
       content,
-      creator: { name: 'Bank' },
-      createdAt: new Date()
-    }
-  };
+      imageUrl: 'images/fatcat1.jpeg',
+      creator: { name: 'Bank' }
+    });
 
-  console.log('create-post-response: ', responseData);
+    // Storing posts in the MongoDB
+    const postResult = await post.save();
 
-  res.status(201).json(responseData);
+    const responseData = {
+      message: 'Post created successfully',
+      post: postResult
+    };
+
+    console.log('post-result: ', postResult);
+
+    // Response created post successfully to client-side
+    res.status(201).json(responseData);
+  } catch (error) {
+    console.log('create-post-error:', error);
+  }
 };
