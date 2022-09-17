@@ -33,6 +33,14 @@ exports.createPost = async (req, res, next) => {
       throw error;
     }
 
+    if (!req.file) {
+      const error = new Error('No image provided.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const imageUrl = req.file.path;
+
     // req.body will works cause bodyParser.json()
     console.log('create-post-request: ', req.body);
 
@@ -42,7 +50,7 @@ exports.createPost = async (req, res, next) => {
     const post = new Post({
       title,
       content,
-      imageUrl: 'images/fatcat1.jpeg',
+      imageUrl: imageUrl,
       creator: { name: 'Bank' }
     });
 
