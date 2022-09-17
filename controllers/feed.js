@@ -6,23 +6,19 @@ exports.getPosts = (req, res, next) => {
   // req.body will works cause bodyParser.json()
   console.log('get-post-request: ', req.body);
 
-  const responseData = {
-    posts: [
-      {
-        _id: '1',
-        title: 'First Post',
-        content: 'This is first post',
-        imageUrl: 'images/fatcat1.jpeg',
-        creator: {
-          name: 'Bank'
-        },
-        createdAt: new Date()
+  // Fetch data from Database
+  Post.find()
+    .then((posts) => {
+      console.log('get-post-response: ', posts);
+      res.status(200).json({ message: 'Fetch posts successfully.', posts });
+    })
+    .catch((error) => {
+      if (!error.statusCode) {
+        error.statusCode = 500;
       }
-    ]
-  };
 
-  console.log('get-post-response: ', responseData);
-  res.status(200).json(responseData);
+      next(error);
+    });
 };
 
 // POST method
@@ -63,11 +59,32 @@ exports.createPost = async (req, res, next) => {
     // Response created post successfully to client-side
     res.status(201).json(responseData);
   } catch (error) {
-    // console.log('create-post-error:', error);
     if (!error.statusCode) {
       error.statusCode = 500;
     }
 
     next(error);
   }
+};
+
+exports.getPost = (req, res, next) => {
+  const postId = req.params.postId;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error('Cloud not find post.');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      res.status(200).json({ message: 'Post fetched. ', post });
+    })
+    .catch((error) => {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+
+      next(error);
+    });
 };
