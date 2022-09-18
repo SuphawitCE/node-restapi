@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const { validationResult } = require('express-validator/check');
 
 const Post = require('../models/post');
@@ -95,4 +98,74 @@ exports.getPost = (req, res, next) => {
 
       next(error);
     });
+};
+
+exports.updatePost = async (req, res, next) => {
+  try {
+    // Validate request
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed, entered data is incorrect.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const postId = req.params.postId;
+    const title = req.body.title;
+    const content = req.body.content;
+
+    let imageUrl = req.body.image;
+
+    if (req.file) {
+      imageUrl = req.file.path;
+    }
+
+    if (!imageUrl) {
+      const error = new Error('No file picked.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    // Update post action in Database
+    const updatePost = await Post.findById(postId);
+
+    console.log({ 'update-post-byId': updatePost });
+
+    if (!updatePost) {
+      const error = new Error('Cloud not find post.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (imageUrl !== updatePost.imageUrl) {
+      clearImage(updatePost.imageUrl);
+    }
+
+    updatePost.title = title;
+    updatePost.imageUrl = imageUrl;
+    updatePost.content = content;
+    const updatePostResponse = await updatePost.save();
+
+    console.log({ 'update-post-response': updatePostResponse });
+
+    res
+      .status(200)
+      .json({ message: 'Post updated successfully', post: updatePostResponse });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
+};
+
+const clearImage = (filePath) => {
+  filePath = path.join(__dirname, '..', filePath);
+
+  // Delete that file by passing a file path
+  fs.unlink(filePath, (error) => {
+    console.log({ 'delete-file-error': error });
+  });
 };
