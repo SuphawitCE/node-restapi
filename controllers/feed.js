@@ -159,37 +159,6 @@ exports.updatePost = async (req, res, next) => {
 
     next(error);
   }
-
-  // Update post action in Database
-  // Post.findById(postId)
-  //   .then((post) => {
-  //     if (!post) {
-  //       const error = new Error('Cloud not find post.');
-  //       error.statusCode = 404;
-  //       throw error;
-  //     }
-
-  //     if (imageUrl !== post.imageUrl) {
-  //       clearImage(post.imageUrl);
-  //     }
-
-  //     post.title = title;
-  //     post.imageUrl = imageUrl;
-  //     post.content = content;
-  //     return post.save();
-  //   })
-  //   .then((result) => {
-  //     res
-  //       .status(200)
-  //       .json({ message: 'Post updated successfully', post: result });
-  //   })
-  //   .catch((error) => {
-  //     if (!error.statusCode) {
-  //       error.statusCode = 500;
-  //     }
-
-  //     next(error);
-  //   });
 };
 
 const clearImage = (filePath) => {
