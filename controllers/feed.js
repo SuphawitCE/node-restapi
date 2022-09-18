@@ -161,35 +161,40 @@ exports.updatePost = async (req, res, next) => {
   }
 };
 
-exports.deletePost = (req, res, next) => {
-  const postId = req.params.postId;
+exports.deletePost = async (req, res, next) => {
+  try {
+    // Extract post id from request parameters
+    const postId = req.params.postId;
 
-  // Find the post by id to delete
-  Post.findById(postId)
-    .then((post) => {
-      if (!post) {
-        const error = new Error('Cloud not find post.');
-        error.statusCode = 404;
-        throw error;
-      }
+    // Find the post by id to delete
+    const getPostId = await Post.findById(postId);
 
-      // Check logged in user
-      clearImage(post.imageUrl);
+    console.log({ 'get-post-id': getPostId });
 
-      return Post.findByIdAndRemove(postId);
-    })
-    .then((result) => {
-      console.log({ 'delete-post-result': result });
+    if (!getPostId) {
+      const error = new Error('Cloud not find post.');
+      error.statusCode = 404;
+      throw error;
+    }
 
-      res.status(200).json({ message: 'Deleted post successfully' });
-    })
-    .catch((error) => {
-      if (!error.statusCode) {
-        error.statusCode = 500;
-      }
+    // Check logged in user
+    clearImage(getPostId.imageUrl);
 
-      next(error);
-    });
+    // Delete post in Database
+    const deletePostById = await Post.findByIdAndRemove(postId);
+
+    console.log({ 'delete-post-by-id': deletePostById });
+
+    res
+      .status(200)
+      .json({ message: 'Deleted post successfully', deletePostById });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
 };
 
 const clearImage = (filePath) => {
@@ -197,6 +202,6 @@ const clearImage = (filePath) => {
 
   // Delete that file by passing a file path
   fs.unlink(filePath, (error) => {
-    console.log({ 'delete-file-error': error });
+    console.log({ 'delete-image-file-error': error });
   });
 };
