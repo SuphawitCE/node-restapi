@@ -161,6 +161,37 @@ exports.updatePost = async (req, res, next) => {
   }
 };
 
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+
+  // Find the post by id to delete
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error('Cloud not find post.');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      // Check logged in user
+      clearImage(post.imageUrl);
+
+      return Post.findByIdAndRemove(postId);
+    })
+    .then((result) => {
+      console.log({ 'delete-post-result': result });
+
+      res.status(200).json({ message: 'Deleted post successfully' });
+    })
+    .catch((error) => {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+
+      next(error);
+    });
+};
+
 const clearImage = (filePath) => {
   filePath = path.join(__dirname, '..', filePath);
 
