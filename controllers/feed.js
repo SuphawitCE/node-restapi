@@ -198,6 +198,7 @@ exports.deletePost = async (req, res, next) => {
 };
 
 const clearImage = (filePath) => {
+  console.log({ 'clear-image': filePath });
   filePath = path.join(__dirname, '..', filePath);
 
   // Delete that file by passing a file path
