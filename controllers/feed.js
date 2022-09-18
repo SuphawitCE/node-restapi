@@ -100,62 +100,96 @@ exports.getPost = (req, res, next) => {
     });
 };
 
-exports.updatePost = (req, res, next) => {
-  // Validate request
-  const errors = validationResult(req);
+exports.updatePost = async (req, res, next) => {
+  try {
+    // Validate request
+    const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    const error = new Error('Validation failed, entered data is incorrect.');
-    error.statusCode = 422;
-    throw error;
-  }
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed, entered data is incorrect.');
+      error.statusCode = 422;
+      throw error;
+    }
 
-  const postId = req.params.postId;
-  const title = req.body.title;
-  const content = req.body.content;
+    const postId = req.params.postId;
+    const title = req.body.title;
+    const content = req.body.content;
 
-  let imageUrl = req.body.image;
+    let imageUrl = req.body.image;
 
-  if (req.file) {
-    imageUrl = req.file.path;
-  }
+    if (req.file) {
+      imageUrl = req.file.path;
+    }
 
-  if (!imageUrl) {
-    const error = new Error('No file picked.');
-    error.statusCode = 422;
-    throw error;
+    if (!imageUrl) {
+      const error = new Error('No file picked.');
+      error.statusCode = 422;
+      throw error;
+    }
+
+    // Update post action in Database
+    const updatePost = await Post.findById(postId);
+
+    console.log({ 'update-post-byId': updatePost });
+
+    if (!updatePost) {
+      const error = new Error('Cloud not find post.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (imageUrl !== updatePost.imageUrl) {
+      clearImage(updatePost.imageUrl);
+    }
+
+    updatePost.title = title;
+    updatePost.imageUrl = imageUrl;
+    updatePost.content = content;
+    const updatePostResponse = await updatePost.save();
+
+    console.log({ 'update-post-response': updatePostResponse });
+
+    res
+      .status(200)
+      .json({ message: 'Post updated successfully', post: updatePostResponse });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
   }
 
   // Update post action in Database
-  Post.findById(postId)
-    .then((post) => {
-      if (!post) {
-        const error = new Error('Cloud not find post.');
-        error.statusCode = 404;
-        throw error;
-      }
+  // Post.findById(postId)
+  //   .then((post) => {
+  //     if (!post) {
+  //       const error = new Error('Cloud not find post.');
+  //       error.statusCode = 404;
+  //       throw error;
+  //     }
 
-      if (imageUrl !== post.imageUrl) {
-        clearImage(post.imageUrl);
-      }
+  //     if (imageUrl !== post.imageUrl) {
+  //       clearImage(post.imageUrl);
+  //     }
 
-      post.title = title;
-      post.imageUrl = imageUrl;
-      post.content = content;
-      return post.save();
-    })
-    .then((result) => {
-      res
-        .status(200)
-        .json({ message: 'Post updated successfully', post: result });
-    })
-    .catch((error) => {
-      if (!error.statusCode) {
-        error.statusCode = 500;
-      }
+  //     post.title = title;
+  //     post.imageUrl = imageUrl;
+  //     post.content = content;
+  //     return post.save();
+  //   })
+  //   .then((result) => {
+  //     res
+  //       .status(200)
+  //       .json({ message: 'Post updated successfully', post: result });
+  //   })
+  //   .catch((error) => {
+  //     if (!error.statusCode) {
+  //       error.statusCode = 500;
+  //     }
 
-      next(error);
-    });
+  //     next(error);
+  //   });
 };
 
 const clearImage = (filePath) => {
