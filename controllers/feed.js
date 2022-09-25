@@ -6,14 +6,25 @@ const { validationResult } = require('express-validator/check');
 const Post = require('../models/post');
 
 exports.getPosts = (req, res, next) => {
-  // req.body will works cause bodyParser.json()
-  console.log('get-post-request: ', req.body);
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  let totalItems;
 
-  // Fetch data from Database
   Post.find()
+    .countDocuments()
+    .then((count) => {
+      totalItems = count;
+
+      // Fetch data from Database
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((posts) => {
       console.log('get-post-response: ', posts);
-      res.status(200).json({ message: 'Fetch posts successfully.', posts });
+      res
+        .status(200)
+        .json({ message: 'Fetch posts successfully.', posts, totalItems });
     })
     .catch((error) => {
       if (!error.statusCode) {
@@ -22,6 +33,9 @@ exports.getPosts = (req, res, next) => {
 
       next(error);
     });
+
+  // req.body will works cause bodyParser.json()
+  console.log('get-post-request: ', req.body);
 };
 
 // POST method
