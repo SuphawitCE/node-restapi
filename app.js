@@ -77,9 +77,9 @@ app.use((req, res, next) => {
 // Register error handling middleware
 app.use((error, req, res, next) => {
   console.log('app.js-error: ', error);
-  const { status, message } = error;
+  const { status, message, data } = error;
 
-  res.status(status || 500).json({ message });
+  res.status(status || 500).json({ message, data });
 });
 
 // Register middleware route /feed
