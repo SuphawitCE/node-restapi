@@ -5,7 +5,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
+// Import endpoint routing
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 
 require('dotenv').config();
 
@@ -14,8 +16,8 @@ const app = express();
 const username = process.env.MONGO_USERNAME;
 const password = process.env.MONGO_PASSWORD;
 
-const collectionName = 'messages';
-const dbURI = `mongodb+srv://${username}:${password}@cluster0.ypnh4.mongodb.net/${collectionName}`;
+const collectionName = 'messages'; //  MongoDB collection name
+const dbURI = `mongodb+srv://${username}:${password}@cluster0.ypnh4.mongodb.net/${collectionName}`; // MongoDB connection URI
 
 // multer file storage configuration
 const fileStorage = multer.diskStorage({
@@ -80,7 +82,11 @@ app.use((error, req, res, next) => {
   res.status(status || 500).json({ message });
 });
 
+// Register middleware route /feed
 app.use('/feed', feedRoutes);
+
+// Register middleware route /auth
+app.use('/auth', authRoutes);
 
 // Connect to mongoose
 mongoose
