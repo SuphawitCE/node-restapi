@@ -1,6 +1,7 @@
-const User = require('../models/user');
-
 const { validationResult } = require('express-validator/check');
+const bcrypt = require('bcryptjs');
+
+const User = require('../models/user');
 
 exports.signup = (req, res, next) => {
   const errors = validationResult(req);
@@ -17,4 +18,26 @@ exports.signup = (req, res, next) => {
   const password = req.body.password;
 
   // Implement authentication, storing user in the Database
+
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      const user = new User({
+        email,
+        password: hashedPassword,
+        name
+      });
+
+      return user.save();
+    })
+    .then((result) => {
+      res.status(201).json({ message: 'User created', userId: result._id });
+    })
+    .catch((error) => {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+
+      next(error);
+    });
 };
