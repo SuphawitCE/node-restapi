@@ -41,3 +41,39 @@ exports.signup = (req, res, next) => {
       next(error);
     });
 };
+
+exports.login = (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  let loadedUser;
+
+  // Check if user exists in Database
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        const error = new Error('A user with this email could not be found.');
+        error.statusCode = 401;
+        throw error;
+      }
+
+      // Validate password
+      loadedUser = user;
+      return bcrypt.compare(password, user.password);
+    })
+    .then((isEqual) => {
+      if (!isEqual) {
+        const error = new Error('User has provided incorrect password.');
+        error.statusCode = 401;
+        throw error;
+      }
+
+      // Generate the JSON Web Token
+    })
+    .catch((error) => {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+
+      next(error);
+    });
+};
