@@ -170,6 +170,12 @@ exports.updatePost = async (req, res, next) => {
       throw error;
     }
 
+    if (updatePost.creator.toString() !== req.userId) {
+      const error = new Error('Cannot edit post due to not authorized');
+      error.statusCode = 403;
+      throw error;
+    }
+
     if (imageUrl !== updatePost.imageUrl) {
       clearImage(updatePost.imageUrl);
     }
@@ -206,6 +212,12 @@ exports.deletePost = async (req, res, next) => {
     if (!getPostId) {
       const error = new Error('Cloud not find post.');
       error.statusCode = 404;
+      throw error;
+    }
+
+    if (getPostId.creator.toString() !== req.userId) {
+      const error = new Error('Cannot delete post due to not authorized');
+      error.statusCode = 403;
       throw error;
     }
 
