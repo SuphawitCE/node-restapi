@@ -89,3 +89,59 @@ exports.login = (req, res, next) => {
       next(error);
     });
 };
+
+exports.getUserStatus = async (req, res, next) => {
+  try {
+    const getUserResult = await User.findById(req.userId);
+
+    console.log({ 'get-user-status': getUserResult });
+
+    if (!getUserResult) {
+      const error = new Error('User not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Send response to client
+    const responseData = {
+      status: getUserResult.status
+    };
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
+};
+
+exports.updateUserStatus = async (req, res, next) => {
+  try {
+    const newStatus = req.body.status;
+    const getUserResult = await User.findById(req.userId);
+
+    if (!getUserResult) {
+      const error = new Error('User not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    getUserResult.status = newStatus;
+    await getUserResult.save();
+
+    // Send response to client
+    const responseData = {
+      message: 'User updated status.'
+    };
+
+    return res.status(200).json(responseData);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
+};
