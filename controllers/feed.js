@@ -227,11 +227,24 @@ exports.deletePost = async (req, res, next) => {
     // Delete post in Database
     const deletePostById = await Post.findByIdAndRemove(postId);
 
+    // Get user from Database
+    const getUserResult = await User.findById(req.userId);
+
+    // Clear post-user relations
+    await getUserResult.posts.pull(postId);
+
+    // Save user attibutes
+    await getUserResult.save();
+
     console.log({ 'delete-post-by-id': deletePostById });
 
-    res
-      .status(200)
-      .json({ message: 'Deleted post successfully', deletePostById });
+    // Send response to client
+    const responseData = {
+      message: 'Deleted post successfully',
+      deletePostById
+    };
+
+    res.status(200).json(responseData);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
