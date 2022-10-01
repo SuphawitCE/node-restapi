@@ -4,6 +4,7 @@ const path = require('path');
 const { validationResult } = require('express-validator/check');
 
 const Post = require('../models/post');
+const User = require('../models/user');
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.page || 1;
@@ -68,18 +69,35 @@ exports.createPost = async (req, res, next) => {
       title,
       content,
       imageUrl: imageUrl,
-      creator: { name: 'Bank' }
+      creator: req.userId
     });
 
     // Storing posts in the MongoDB
     const postResult = await post.save();
 
+    //  Users and Get user from MongoDB
+    const getUserResult = await User.findById(req.userId);
+
+    // Add new post to user or link post to user
+    getUserResult.posts.push(post);
+
+    // Save user with a new post
+    await getUserResult.save();
+
+    // Send response to client
     const responseData = {
       message: 'Post created successfully',
-      post: postResult
+      post,
+      creator: { _id: getUserResult._id, name: getUserResult.name }
     };
 
-    console.log('post-result: ', postResult);
+    console.log({
+      'connection-posts-and-users': {
+        postResult,
+        getUserResult,
+        responseData
+      }
+    });
 
     // Response created post successfully to client-side
     res.status(201).json(responseData);
