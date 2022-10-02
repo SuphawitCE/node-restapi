@@ -7,12 +7,11 @@ const Post = require('../models/post');
 const User = require('../models/user');
 
 exports.getPosts = async (req, res, next) => {
+  // Configure the pagination, display 2 posts per 1 page
   const currentPage = req.query.page || 1;
   const perPage = 2;
-  // let totalItems;
 
   try {
-    // async/await
     // Get total post
     const totalItems = await Post.find().countDocuments();
     // Limit the post per page
@@ -20,33 +19,6 @@ exports.getPosts = async (req, res, next) => {
       .populate('creator')
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
-    //
-
-    // fetch
-    // Post.find()
-    //   .countDocuments()
-    //   .then((count) => {
-    //     totalItems = count;
-
-    //     // Fetch data from Database
-    //     return Post.find()
-    //       .skip((currentPage - 1) * perPage)
-    //       .limit(perPage);
-    //   })
-    //   .then((posts) => {
-    //     console.log('get-post-response: ', posts);
-    //     res
-    //       .status(200)
-    //       .json({ message: 'Fetch posts successfully.', posts, totalItems });
-    //   })
-    //   .catch((error) => {
-    //     if (!error.statusCode) {
-    //       error.statusCode = 500;
-    //     }
-
-    //     next(error);
-    //   });
-    //
 
     // req.body will works cause bodyParser.json()
     console.log('get-post-request: ', totalItems, posts);
