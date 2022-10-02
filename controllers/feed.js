@@ -111,26 +111,32 @@ exports.createPost = async (req, res, next) => {
   }
 };
 
-exports.getPost = (req, res, next) => {
+exports.getPost = async (req, res, next) => {
   const postId = req.params.postId;
 
-  Post.findById(postId)
-    .then((post) => {
-      if (!post) {
-        const error = new Error('Cloud not find post.');
-        error.statusCode = 404;
-        throw error;
-      }
+  try {
+    const getPost = await Post.findById(postId);
 
-      res.status(200).json({ message: 'Post fetched. ', post });
-    })
-    .catch((error) => {
-      if (!error.statusCode) {
-        error.statusCode = 500;
-      }
+    if (!getPost) {
+      const error = new Error('Cloud not find post.');
+      error.statusCode = 404;
+      throw error;
+    }
 
-      next(error);
-    });
+    // Send response to client
+    const responseData = {
+      message: 'Post fetched. ',
+      post: getPost
+    };
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
 };
 
 exports.updatePost = async (req, res, next) => {
