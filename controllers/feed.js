@@ -6,37 +6,66 @@ const { validationResult } = require('express-validator/check');
 const Post = require('../models/post');
 const User = require('../models/user');
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1;
   const perPage = 2;
-  let totalItems;
+  // let totalItems;
 
-  Post.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
+  try {
+    // async/await
+    // Get total post
+    const totalItems = await Post.find().countDocuments();
+    // Limit the post per page
+    const posts = await Post.find()
+      .populate('creator')
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+    //
 
-      // Fetch data from Database
-      return Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((posts) => {
-      console.log('get-post-response: ', posts);
-      res
-        .status(200)
-        .json({ message: 'Fetch posts successfully.', posts, totalItems });
-    })
-    .catch((error) => {
-      if (!error.statusCode) {
-        error.statusCode = 500;
-      }
+    // fetch
+    // Post.find()
+    //   .countDocuments()
+    //   .then((count) => {
+    //     totalItems = count;
 
-      next(error);
-    });
+    //     // Fetch data from Database
+    //     return Post.find()
+    //       .skip((currentPage - 1) * perPage)
+    //       .limit(perPage);
+    //   })
+    //   .then((posts) => {
+    //     console.log('get-post-response: ', posts);
+    //     res
+    //       .status(200)
+    //       .json({ message: 'Fetch posts successfully.', posts, totalItems });
+    //   })
+    //   .catch((error) => {
+    //     if (!error.statusCode) {
+    //       error.statusCode = 500;
+    //     }
 
-  // req.body will works cause bodyParser.json()
-  console.log('get-post-request: ', req.body);
+    //     next(error);
+    //   });
+    //
+
+    // req.body will works cause bodyParser.json()
+    console.log('get-post-request: ', totalItems, posts);
+
+    const responseData = {
+      message: 'Fetch posts successfully.',
+      totalItems,
+      posts
+    };
+
+    // Send response to client
+    res.status(200).json(responseData);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
 };
 
 // POST method
