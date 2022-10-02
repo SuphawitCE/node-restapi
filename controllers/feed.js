@@ -6,37 +6,38 @@ const { validationResult } = require('express-validator/check');
 const Post = require('../models/post');
 const User = require('../models/user');
 
-exports.getPosts = (req, res, next) => {
+exports.getPosts = async (req, res, next) => {
+  // Configure the pagination, display 2 posts per 1 page
   const currentPage = req.query.page || 1;
   const perPage = 2;
-  let totalItems;
 
-  Post.find()
-    .countDocuments()
-    .then((count) => {
-      totalItems = count;
+  try {
+    // Get total post
+    const totalItems = await Post.find().countDocuments();
+    // Limit the post per page
+    const posts = await Post.find()
+      .populate('creator')
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
 
-      // Fetch data from Database
-      return Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((posts) => {
-      console.log('get-post-response: ', posts);
-      res
-        .status(200)
-        .json({ message: 'Fetch posts successfully.', posts, totalItems });
-    })
-    .catch((error) => {
-      if (!error.statusCode) {
-        error.statusCode = 500;
-      }
+    // req.body will works cause bodyParser.json()
+    console.log('get-post-request: ', totalItems, posts);
 
-      next(error);
-    });
+    const responseData = {
+      message: 'Fetch posts successfully.',
+      totalItems,
+      posts
+    };
 
-  // req.body will works cause bodyParser.json()
-  console.log('get-post-request: ', req.body);
+    // Send response to client
+    res.status(200).json(responseData);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
 };
 
 // POST method
@@ -110,26 +111,32 @@ exports.createPost = async (req, res, next) => {
   }
 };
 
-exports.getPost = (req, res, next) => {
+exports.getPost = async (req, res, next) => {
   const postId = req.params.postId;
 
-  Post.findById(postId)
-    .then((post) => {
-      if (!post) {
-        const error = new Error('Cloud not find post.');
-        error.statusCode = 404;
-        throw error;
-      }
+  try {
+    const getPost = await Post.findById(postId);
 
-      res.status(200).json({ message: 'Post fetched. ', post });
-    })
-    .catch((error) => {
-      if (!error.statusCode) {
-        error.statusCode = 500;
-      }
+    if (!getPost) {
+      const error = new Error('Cloud not find post.');
+      error.statusCode = 404;
+      throw error;
+    }
 
-      next(error);
-    });
+    // Send response to client
+    const responseData = {
+      message: 'Post fetched. ',
+      post: getPost
+    };
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
+    next(error);
+  }
 };
 
 exports.updatePost = async (req, res, next) => {
