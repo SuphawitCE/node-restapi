@@ -265,6 +265,13 @@ exports.deletePost = async (req, res, next) => {
     // Save user attibutes
     await getUserResult.save();
 
+    // Sent data in posts channel real-time
+    const ioData = {
+      action: 'delete',
+      post: postId
+    };
+    io.getIO().emit('posts', ioData);
+
     console.log({ 'delete-post-by-id': deletePostById });
 
     // Send response to client
