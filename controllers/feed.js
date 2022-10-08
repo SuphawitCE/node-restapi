@@ -86,8 +86,17 @@ exports.createPost = async (req, res, next) => {
     // Save user with a new post
     await getUserResult.save();
 
-    // Send data in posts channel real-time
-    const ioData = { action: 'create', post };
+    // Sent data in posts channel real-time
+    const ioData = {
+      action: 'create',
+      post: {
+        ...post._doc,
+        creator: {
+          _id: req.userId,
+          name: getUserResult.name
+        }
+      }
+    };
     io.getIO().emit('posts', ioData);
 
     // Send response to client
