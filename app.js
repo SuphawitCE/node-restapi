@@ -93,7 +93,17 @@ mongoose
   .connect(dbURI)
   .then((result) => {
     console.log('Server are running...');
-    app.listen(8080);
+
+    // Node server
+    const nodeServer = app.listen(8080);
+
+    // Setup the socket.io connection and establish
+    const io = require('socket.io')(nodeServer);
+
+    // Wait for client connection
+    io.on('connection', (socket) => {
+      console.log('Socket.io client connected');
+    });
   })
   .catch((err) => {
     console.log(err);
