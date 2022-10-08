@@ -3,7 +3,7 @@ const path = require('path');
 
 const { validationResult } = require('express-validator/check');
 
-const io = require('../socket');
+const io = require('../utils/socket');
 const Post = require('../models/post');
 const User = require('../models/user');
 
@@ -264,6 +264,13 @@ exports.deletePost = async (req, res, next) => {
 
     // Save user attibutes
     await getUserResult.save();
+
+    // Sent data in posts channel real-time
+    const ioData = {
+      action: 'delete',
+      post: postId
+    };
+    io.getIO().emit('posts', ioData);
 
     console.log({ 'delete-post-by-id': deletePostById });
 
