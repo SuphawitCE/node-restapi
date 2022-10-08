@@ -98,7 +98,7 @@ mongoose
     const nodeServer = app.listen(8080);
 
     // Setup the socket.io connection and establish
-    const io = require('socket.io')(nodeServer);
+    const io = require('./socket').init(nodeServer);
 
     // Wait for client connection
     io.on('connection', (socket) => {
