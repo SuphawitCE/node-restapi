@@ -18,6 +18,7 @@ exports.getPosts = async (req, res, next) => {
     // Limit the post per page
     const posts = await Post.find()
       .populate('creator')
+      .sort({ created: -1 })
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
