@@ -181,7 +181,7 @@ exports.updatePost = async (req, res, next) => {
     }
 
     // Update post action in Database
-    const updatePost = await Post.findById(postId);
+    const updatePost = await Post.findById(postId).populate('creator');
 
     console.log({ 'update-post-byId': updatePost });
 
@@ -191,7 +191,7 @@ exports.updatePost = async (req, res, next) => {
       throw error;
     }
 
-    if (updatePost.creator.toString() !== req.userId) {
+    if (updatePost.creator._id.toString() !== req.userId) {
       const error = new Error('Cannot edit post due to not authorized');
       error.statusCode = 403;
       throw error;
@@ -205,6 +205,13 @@ exports.updatePost = async (req, res, next) => {
     updatePost.imageUrl = imageUrl;
     updatePost.content = content;
     const updatePostResponse = await updatePost.save();
+
+    // Sent data in posts channel real-time, update post real-time once edited
+    const ioData = {
+      action: 'update',
+      post: updatePostResponse
+    };
+    io.getIO().emit('posts', ioData);
 
     console.log({ 'update-post-response': updatePostResponse });
 
