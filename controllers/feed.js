@@ -3,6 +3,7 @@ const path = require('path');
 
 const { validationResult } = require('express-validator/check');
 
+const io = require('../socket');
 const Post = require('../models/post');
 const User = require('../models/user');
 
@@ -84,6 +85,10 @@ exports.createPost = async (req, res, next) => {
 
     // Save user with a new post
     await getUserResult.save();
+
+    // Send data in posts channel real-time
+    const ioData = { action: 'create', post };
+    io.getIO().emit('posts', ioData);
 
     // Send response to client
     const responseData = {
