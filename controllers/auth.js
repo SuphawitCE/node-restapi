@@ -82,12 +82,14 @@ exports.login = async (req, res, next) => {
     // Send response to client
     const responseData = { token, userId: loadedUser._id.toString() };
     res.status(200).json(responseData);
+    return 'User login successfully';
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
 
     next(error);
+    return error;
   }
 };
 
