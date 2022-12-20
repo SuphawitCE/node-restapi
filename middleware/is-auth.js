@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, 'credentialkey');
   } catch (error) {
-    console.log({ 'is-auth-middleware-error': error });
+    // console.log({ 'is-auth-middleware-error': error });
     error.statusCode = 500;
     throw error;
   }
