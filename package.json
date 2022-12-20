@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "start-server": "node app.js",
-    "test": "mocha --recursive"
+    "test": "mocha --recursive --timeout 5000"
   },
   "keywords": [],
   "author": "SuphawitCE",
