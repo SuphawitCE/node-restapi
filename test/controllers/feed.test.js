@@ -1,17 +1,19 @@
 const { expect } = require('chai');
 const mongoose = require('mongoose');
 const sinon = require('sinon');
+require('dotenv').config();
 
 const User = require('../../models/user');
 const FeedController = require('../../controllers/feed');
 const io = require('../../utils/socket');
 
+const { mockEnv } = require('../fixtures/general.json');
 const { mockUserSignUpPayload } = require('../fixtures/requestPayload.json');
 
 const next = () => {};
 
-const username = process.env.MONGO_USERNAME;
-const password = process.env.MONGO_PASSWORD;
+const username = process.env.MONGO_USERNAME || mockEnv.MONGO_USERNAME;
+const password = process.env.MONGO_PASSWORD || mockEnv.MONGO_PASSWORD;
 
 const collectionName = 'test-messages'; //  MongoDB collection name
 const dbURI = `mongodb+srv://${username}:${password}@cluster0.ypnh4.mongodb.net/${collectionName}`; // MongoDB connection URI
