@@ -1,0 +1,9 @@
+{
+  "mockUserSignUpPayload": {
+    "email": "qa@test.com",
+    "password": "qatest123*",
+    "name": "QA",
+    "posts": [],
+    "_id": "5c0f66b979af55031b34728a"
+  }
+}

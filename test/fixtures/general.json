@@ -1,0 +1,10 @@
+{
+  "mockEnv": {
+    "DB_HOSTNAME": "mock",
+    "DB_USER": "mock",
+    "DB_DATABASE": "mock",
+    "DB_PASSWORD": "mock",
+    "MONGO_USERNAME": "mock",
+    "MONGO_PASSWORD": "mock"
+  }
+}

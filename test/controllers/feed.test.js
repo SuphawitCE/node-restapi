@@ -6,6 +6,8 @@ const User = require('../../models/user');
 const FeedController = require('../../controllers/feed');
 const io = require('../../utils/socket');
 
+const { mockUserSignUpPayload } = require('../fixtures/requestPayload.json');
+
 const next = () => {};
 
 const username = process.env.MONGO_USERNAME;
@@ -14,26 +16,18 @@ const password = process.env.MONGO_PASSWORD;
 const collectionName = 'test-messages'; //  MongoDB collection name
 const dbURI = `mongodb+srv://${username}:${password}@cluster0.ypnh4.mongodb.net/${collectionName}`; // MongoDB connection URI
 
-const payload = {
-  email: 'qa@test.com',
-  password: 'qatest123*',
-  name: 'QA',
-  posts: [],
-  _id: '5c0f66b979af55031b34728a'
-};
-
 describe('Feed Controller', () => {
   // Create user account before run all tests
   before(async () => {
     await mongoose.connect(dbURI);
-    const user = new User(payload);
+    const user = new User(mockUserSignUpPayload);
     await user.save();
     io.init();
   });
 
   // Delete user account after run all tests
   after(async () => {
-    await User.findByIdAndDelete(payload._id);
+    await User.findByIdAndDelete(mockUserSignUpPayload._id);
     await mongoose.disconnect();
   });
 
@@ -46,7 +40,7 @@ describe('Feed Controller', () => {
       file: {
         path: 'mock_path'
       },
-      userId: payload._id
+      userId: mockUserSignUpPayload._id
     };
 
     const res = {
