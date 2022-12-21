@@ -24,27 +24,16 @@ const payload = {
 
 describe('Authentication Controller', () => {
   // Create user account before run all tests
-  before((done) => {
-    mongoose
-      .connect(dbURI)
-      .then((result) => {
-        const user = new User(payload);
-        return user.save();
-      })
-      .then(() => {
-        done();
-      });
+  before(async () => {
+    await mongoose.connect(dbURI);
+    const user = new User(payload);
+    await user.save();
   });
 
   // Delete user account after run all tests
-  after((done) => {
-    User.deleteMany(payload)
-      .then(() => {
-        return mongoose.disconnect();
-      })
-      .then(() => {
-        done();
-      });
+  after(async () => {
+    await User.findByIdAndDelete(payload._id);
+    await mongoose.disconnect();
   });
 
   it('Should throw an error with status code 500 if database connection failure', async () => {
@@ -53,45 +42,35 @@ describe('Authentication Controller', () => {
 
     const req = {
       body: {
-        email: 'qa@test.com',
-        password: 'qatest123*'
+        email: payload.email,
+        password: payload.password
       }
     };
 
-    // const result = await AuthController.login(req, {}, next);
+    const result = await AuthController.login(req, {}, next);
 
-    // expect(result).to.be.an('error');
-    // expect(result).to.have.property('statusCode', 500);
-
-    AuthController.login(req, {}, next).then((result) => {
-      expect(result).to.be.an('error');
-      expect(result).to.have.property('statusCode', 500);
-      done();
-    });
+    expect(result).to.be.an('error');
+    expect(result).to.have.property('statusCode', 500);
 
     User.findOne.restore();
   });
 
-  it('Should send a response with a valid user status for an existing user', (done) => {
+  it('Should send a response with a valid user status for an existing user', async () => {
     const req = { userId: payload._id };
     const res = {
       statusCode: 500,
       userStatus: null,
-      json: function (data) {
-        this.userStatus = data.status;
-        return null;
-      },
       status: function (code) {
         this.statusCode = code;
         return this;
+      },
+      json: function (data) {
+        this.userStatus = data.status;
       }
     };
 
-    AuthController.getUserStatus(req, res, next).then(() => {
-      expect(res.statusCode).to.be.equal(200);
-      expect(req.userStatus).to.be.equal('New user');
-
-      done();
-    });
+    await AuthController.getUserStatus(req, res, next);
+    expect(res.statusCode).to.be.equal(200);
+    expect(res.userStatus).to.be.equal('New user');
   });
 });
