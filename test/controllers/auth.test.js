@@ -1,5 +1,4 @@
 const { expect } = require('chai');
-const jwt = require('jsonwebtoken');
 const sinon = require('sinon');
 const mongoose = require('mongoose');
 
