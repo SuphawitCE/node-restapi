@@ -16,8 +16,3 @@ jobs:
       - name: Check for a Semantic Release
         uses: cycjimmy/semantic-release-action@v3
         id: semantic
-        with:
-          branch: master
-          extra_plugins: |
-            @semantic-release/changelog
-            conventional-changelog-conventionalcommits
