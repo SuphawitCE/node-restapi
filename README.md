@@ -4,9 +4,8 @@
 
 This repository is aim to practice basic node.js and use as a guide
 
-
 Checkout some branch with a specific feature
-
+xxxxxxx
 `git checkout somebranch`
 
 ```
