@@ -85,7 +85,7 @@ exports.createPost = async (req, res, next) => {
     getUserResult.posts.push(post);
 
     // Save user with a new post
-    await getUserResult.save();
+    const savedUser = await getUserResult.save();
 
     // Sent data in posts channel real-time
     const ioData = {
@@ -117,6 +117,8 @@ exports.createPost = async (req, res, next) => {
 
     // Response created post successfully to client-side
     res.status(201).json(responseData);
+
+    return savedUser;
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
